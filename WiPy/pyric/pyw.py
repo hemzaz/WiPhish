@@ -286,7 +286,7 @@ def interfaces() -> List[str]:
         for line in dev_file:
             # the file format is an interface_name followed by a colon
             colon = line.find(":")
-            wlan = line.find("wl")
+            wl = line.find("wl")
             if colon > 0 and wl > 0:
                 # left strip is needed because some of the interface names
                 # are not always at the start of the line
