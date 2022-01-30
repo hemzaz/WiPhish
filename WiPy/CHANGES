@@ -1,0 +1,202 @@
+PyRIC CHANGES
+
+v 0.0.2 to 0.1.0
+   o added ifconfig/iwconfig functions to pyw
+   o reworked exception handling
+    - all exceptions from libnl, libio & pyw are pyric.error
+    - pyw will allow pyric to pass through
+    - reworked errorcodes to derive from errno
+   o added _iostub_, _nlstub_ and reworked traditiona commands to utilize these
+   o finished porting nl80211_h and nl80211_c (for attribute policies)
+   o pyw no longer provides familyid as a public function, rather it now uses a
+     private global value for the nl80211 family id and will instantiate it one
+     time only. In this way, callers do not not have to worry about retrieving and
+     passing it
+   o regdom get & set implemented
+   o info implemented
+   o removed radio/Radio class (shouldn't be the responsibility of this)
+   o added channels.py (provides channel/freq functions)
+   o added RFI page for notes/observations/questions
+   o changed utils.py to device.py
+   o updated libnl
+   o added channel set & get
+    - channel get only works when device is associated
+    - channel set only works when card is in monitor mode and all other interfaces
+     have been deleted
+   o added device add & delete
+   o rewrote pyw function to handle one-time & persistent functions using a
+    single function interface for each command
+   o added Card class and wrote functions to handle it in pyw
+   o implemented basic help functionality (for nl80211)
+   o added monitor flag(s) support in devadd
+   o began work on a user guide
+   o added nested attribute handling
+   o added partial phyinfo handles all but supported channels/bands
+   o fixed bugs in devinfo and phyinfo
+   o added setup.py and required files
+   o at least one card (ath9k_htc) has an unknown supported command, added a
+    wrapper around the list IFTYPES to handle commands not listed
+   o libnl: attribute related i.e. nla_* moved out of GENLMsg class and made as
+     standalone functions
+   o in pyw
+    - added modeset/modeget in pyw
+    - readded freqset in pyw
+    - added devcmds in pyw
+    - annotated (in comments) if fcts needed root privileges
+    - added functions to get/set ip address, netmask and broadcast
+    - fixed PEP8 errors
+    - added function pulling supported freqs out NL80211_ATTR_WIPHY_BANDS
+     * ATT using _getfreqs_ which attempts to find the packed version of every
+      freq
+     * nl80211_c.nl80211_parse_freqs works but is slower than _getfreqs_ and
+      uses several hacks which may make it invalid for certain cards
+    - added 4.9GHz frequencies to channels.py
+    - fixed _validmac_ to validate both uppercase & lowercase hex characters
+    - added devfreqs, devchs
+   o unittest completed 61 tests ran in 5.360s
+   o added rfkill (still working on it)
+   o production release
+
+v 0.1.1 - 0.1.2
+  desc: wireless nic library: wireless radio identification, manipulation, enumeration
+  includes:  /nlhelp /lib /net /utils pyw 0.1.2
+  changes:
+   o restructured hierarchy
+    - renamed device to hardware
+   o added mac address related functions to hardware
+   o split rfkill into functions file and definition file
+   o added block/unblock to pyw
+   o updated pyw to handle the newest version of libnl.py's processing of nested
+     attributes
+
+v 0.1.3
+   o added this File, a revision history
+   o fixed issues
+     - # 13: Failed to process commands.help
+     - # 14: nlmsg_fromstream can incorrectly return error based on stream size
+     - # 11: MemoryError on nla_parse_nested()
+   o added nla_put_flag to libnl
+   o identified (unopened issue) and fixed error with ouifetch having invalid path
+     of default oui file
+   o moved parseoui from hardware to ouifetch renaming to parse
+   o removed ouifetch execution ability - parse and fetch must be called w/in
+    python console. Will eventually add this capability as as top-level program
+   o added ieee80211_h.py to net/wireless
+   o added supported ciphers to pyw.phyinfo dict
+   o added functions
+    - pwrsaveset and pwrsaveget
+    - covclassset
+    - retryshortset
+    - retrylongset
+    - rtsthreshset
+    - fragthreshset
+
+v 0.1.4
+   o added functions:
+    - isup
+    - covclassget
+    - retryshortget
+    - retrylongget
+    - ifinfo
+   o modified devadd. User is allowed to submit a Card object or a physical index
+   o removed hardcoded values for covclassset, retry(short|long)set, retsthreshet and
+     fragrthreshset
+     - constants now defined in wlan.h (see below)
+   o removed return True where redundant i.e. when setting mac address we can assume
+    it worked if no error was thrown
+   o renamed ieee80211_h to wlan
+   o didn't like the incestual circular pyric error (libnl shouldn't know about pyric)
+    - replaced pyric.error with defined error in libnl and libio
+    - pyw has to catch libnl and libio errors and reraise as pyric errors
+    - retooled exception messages
+   o added new functions from 0.1.3 and 0.1.4 to unittests
+   o updated nl80211_h w/ additional constants included in kernel v 4 header
+   o added propietary concept of set to netlink processing
+    - nl80211 appears to define a set of like-sized elements (see cipher_suites)
+   o modified pyric exceptions
+    - imports errno codes into pyric, conforming how functions access error codes
+
+v 0.1.5 Begin STA associated functionality
+  o added functions:
+   - isconnected
+   - disconnect
+   - link
+   - stainfo
+   - devset
+   - phylist
+   - openconnect (doesn't currently work)
+   - phyadd (renamed from original devadd, iw phy <phy> interface add ...)
+   - devadd (iw dev <dev> interface add ....)
+  o updated nested netlink attribute handling - my understanding of it was incomplete
+   - There are still occasional errors
+   - nested attributes are parsed as 'far' as possible
+  o reupdated nested netlink attribute handling - this time it really works :)
+   - nested attributes are now parsed correctly, any errors are a result of
+    incorrect packing on the other side or packet corruption and the entire
+    unparsed attribute will be returned.
+   - nla_parse_nested has been changed to return a list of tuples
+     t = (index,attribute) which (TODO #41) eases the burden on the calling
+     function
+   - fixed 're'nesting of nested attributes
+   - parsing wiphy bands (issue #7) is now fully functional and no longer relies
+     on a hacked fix
+  o devstds now uses phyinfo to determine standards Card supports
+  o completely 'remodeled' functions in pyw to take advantage of new parsing
+   from libnl (have left some of the error checking in place as a backup until
+   testing confirms that the new nla_parse_nested is bug-free)
+  o fixed error on devadd during restoration in examples/pentest.py
+  o fixed output error, incorrect labeling
+  o fixed output error ASW max tx power
+  o added phylist w.r.t issue #17
+  o fixed devfreqs, devchs after updating phyinfo
+  o add support for python3 (keeping compability with python2.7)
+   - urllib2 vs urllib
+   - replaced map with list comprehensions
+   - replaced xrange with range
+   - python 3.5 compatible. python 3.0 is compatible except for examples and
+    pyw.unittest.pyw (see corresponding files for reasons)
+   - python 2.7 is the preferred (for me at least) 'medium' and compatibly issues
+    with python 3 have been rectified at the expense of python 3 and not python 2
+  o fixed incorrect frequencies in unii_5_C2F in utils/channels
+  o updated pyw.unittest for python 3.5 and for added functions
+  o added by band to channels and freqs in utils/channels.py
+
+v 0.1.6 Continue with STA functionality
+  o Issue #21 resolved. openconnect (renamed to connect) now works. (had to fix
+   how the ssid was being passed. as a string with an affixed null byte, it would
+   fail but as unspec, it succeeded)
+    - issue 1: wpa_supplicant must be turned off
+    - issue 2: caller/user must configure dhcp request or inet themselves
+    - issue 3: only works on open networks
+  o Issue #24 (TODO #50) resolved. getcard which is the entry point for any
+   nl80211 functionality uses devinfo to retrieve the Card tuple. devinfo will 
+   now report No Such device as two seperate errors one identifying when there 
+   is no device currently present on the machine and one identifying when the
+   specified dev's driver does not support nl80211
+  o fixed TypeError resulting from raising pyric.error incorrectly
+  o phyadd accepts either a card or a phy
+  o added freqget
+  o Note: w.r.t https://wraithwireless.wordpress.com/2016/07/24/linux-kernel-bug/
+   have tested further, phyadd,devadd will work (i.e. not rename the card)
+   under the following conditions a) the type is not managed or b) there is no
+   other device currently associated with the new card's phy. Have also determined
+   that integrated cards are also suspect to this bug?
+  o made pyric error messages less ambiguous
+  o changed template and stub so that all pyw functions can now use named parameters
+   if desired
+    - i.e. pyw.freqset(card=<Card>,rf=2412,nlsock=<nlsocket>) or
+           pyw.freqset(<Card>,2412,None,<nlsocket>)
+  o renamed the following functions:
+   - inetget to ifaddrget
+   - inetset to ifaddrset
+   - ip4set to inetset
+   - netmaskset to maskset
+   - broadcastset to bcastset
+  o adddres related functions mac and ifaddr return True on success, False otherwise
+  o commented out constants in sockios_h that are not being used
+   - no significant change but will reduce bytecode size
+  o fixed error in iswireless (referenced in wifiphisher #329)
+  o fixed phylist failure for OpenWRT as pointed out by sarom5
+  o Corrected README.md (Issue #27)
+  o Added scripts directory
+   - added ouiupdate.py to scripts directory
