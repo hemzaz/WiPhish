@@ -257,15 +257,7 @@ from .nlhelp.nlsearch import cmdbynum
 from .utils.channels import CHTYPES, ch2rf, channels, freqs, rf2ch
 from .utils.hardware import dpath, ifcard, manufacturer
 from .utils.ouifetch import load
-from .utils.rfkill import (
-    getidx,
-    hard_blocked,
-    ipath,
-    rfkill_block,
-    rfkill_list,
-    rfkill_unblock,
-    soft_blocked,
-)
+from .utils.rfkill import *
 
 EUNDEF = -1  # undefined error
 _FAM80211ID_ = None
@@ -294,8 +286,8 @@ def interfaces() -> List[str]:
         for line in dev_file:
             # the file format is an interface_name followed by a colon
             colon = line.find(":")
-            wlan = line.find("wlan")
-            if colon > 0 and wlan > 0:
+            wlan = line.find("wl")
+            if colon > 0 and wl > 0:
                 # left strip is needed because some of the interface names
                 # are not always at the start of the line
                 interface = line[:colon].lstrip()
