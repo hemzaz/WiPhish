@@ -1,5 +1,0 @@
-pbkdf2
-scapy
-tornado>=5.0.0
-roguehostapd
-pyric

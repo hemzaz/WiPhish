@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: wifiphisher
+Version: 1.4
+Summary: Automated phishing attacks against Wi-Fi networks
+Home-page: UNKNOWN
+Author: me@theman
+Author-email: me@theman
+License: GPL
+Keywords: wifiphisher,evil,twin,phishing
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)
+Classifier: Intended Audience :: Information Technology
+
+UNKNOWN
+
